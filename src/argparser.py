@@ -1,31 +1,24 @@
 def parse():
     import argparse
     import json
-    directory_options = {
-        
+    from os.path import abspath
+
+    options = {
+        "mode": "directory",    
         "project-directory": "./",
         "recursive": True,
         "filename-matches": ".+",
-        "language-associations": json.load(""
-    }
-
-    file_options = {
-
-    }
-
-    general_options = {
-    
-        "mode": "directory" # file|directory / f|d
-
+        "language-associations": json.load(open(abspath("../cfg/filetype_regex.json")))
     }
     
-    
+
     parser = argparse.ArgumentParser()
 
     parser.add_argument("--mode", 
                         help="Mode. Directory traverses a whole directory (recursive by default, see --no-recursive) while file analyzes a single file",
                         action="store",
                         choices=["directory", "file"],
+                        default="directory",
                         dest="mode")
 
     parser.add_argument("--project-directory", "-d",
@@ -55,12 +48,10 @@ def parse():
 
     # Join dicts instead of overwriting
     key = "language-associations"
-    directory_options[key] = {**directory_options[key], **parsed[key]}
+    options[key] = {**options[key], **parsed[key]}
     del parsed[key]
 
-    options = {**directory_options, **file_options, **general_options, **parsed }
-    
-    return options  
+    return {**options, **parsed }
 
 
 if __name__ == "__main__":
