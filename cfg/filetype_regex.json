@@ -1,0 +1,9 @@
+{
+    "python": "^.+\.(py|py3|)$",
+    "javascript": "^.+\.js$",
+    "coffeescript": "^.+\.ts$",
+    "c": "^.+\.c$",
+    "cplusplus": "^.+\.(cpp|cc|cxx)",
+    "php": "^.+\.(p(hp(3|4|5|7)?)|html)"
+
+}
