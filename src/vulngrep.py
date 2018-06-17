@@ -6,6 +6,7 @@ import pygments
 import pygments.lexers
 import pygments.formatters
 import ansiwrap
+import glob
 
 language_analyzer_map = {
 
@@ -21,16 +22,29 @@ def main():
     
     PythonAnalyzer.dangerous_functions = options["dangerous-functions"]["python"]
     
+    print_if_no_results = False
     if options["mode"] == "file":
+        files = [options["path"]]
+        print_if_no_results = True
+    else:
+        files = []
+        pass
+    
+    for f in files:
         
-        path = options["path"]
+        print("-"*80)
+        print(founds_printify(analyze_file(f, options), print_if_no_results).strip())
+
+    print("-"*80)
+def analyze_file(path, options):
+    
         dirname = os.path.dirname(path)
         if dirname == "":
             dirname = "."
 
         basename = os.path.basename(path)
         
-        analyzer = resolve_parser_from_filename(options["path"], options["language-associations"])
+        analyzer = resolve_parser_from_filename(path, options['language-associations'])
         
         if analyzer == None:
             print(f"No filename matches for ({dirname}/){basename}")
@@ -41,12 +55,11 @@ def main():
 
         analyzer = analyzer(options, path) 
 
-        buffer = open(options["path"], 'r')
+        buffer = open(path, 'r')
 
         analyzer.analyze_file(buffer.read())
         
-        print_founds(analyzer)
-
+        return analyzer
 
 def resolve_parser_from_filename(filename, language_assocs):
     
@@ -57,8 +70,6 @@ def resolve_parser_from_filename(filename, language_assocs):
 
     return None
 
-
-
 def highlight_colors(language, code):
 
     lexers = {
@@ -67,12 +78,10 @@ def highlight_colors(language, code):
 
     return pygments.highlight(code, lexers[language](), pygments.formatters.TerminalFormatter()).strip()
 
-
-def print_founds(analyzer: BaseAnalyzer):
+def founds_printify(analyzer: BaseAnalyzer, give_error=True):
     
     from colored import fg, bg, attr
     
-
     def ansi_ljust(s, width):
         needed = width - ansiwrap.ansilen(s)
         if needed > 0:
@@ -86,6 +95,8 @@ def print_founds(analyzer: BaseAnalyzer):
 
     filename_line_col_max = len(analyzer.filename) + max([len(str(x['lineno']) + str(x['col'])) for x in analyzer.found]) + 2
     code_max = max([ansiwrap.ansilen(x['code']) for x in analyzer.found])
+    
+    lines = ""
 
     for found in analyzer.found:
         
@@ -100,23 +111,26 @@ def print_founds(analyzer: BaseAnalyzer):
         
         line += f"{fg(46)}{found['from']}{attr(0)}() }}"
 
-        print(line)
-        
-    
+        lines += line + "\n"
+         
     if len(analyzer.found) == 0:
-        print(f"{analyzer.filename}: No potentially dangerous functions found")
-
+        return f"{analyzer.filename}: No potentially dangerous functions found" if give_error else None
+    
+    return lines
 if __name__ == "__main__":
     exit(main())
 
-
-
 if 1 == 0:
     eval("a")
-    import os
-    os.system('ls')
+    from os import system as b
+    b("ls")
 
-    import os.system as b
-    from os import *
-    b("a")
+    from os import system
+
     system("ls")
+
+    import cPickle
+
+    cPickle.loads("junk")
+
+    cPickle.load("junk2")

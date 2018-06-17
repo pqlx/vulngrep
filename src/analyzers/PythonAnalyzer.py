@@ -3,6 +3,7 @@ import ast
 from typing import *
 import re
 import astunparse
+import pprint
 
 class PythonAnalyzer(BaseAnalyzer):
     
@@ -11,7 +12,14 @@ class PythonAnalyzer(BaseAnalyzer):
         def __init__(self, analyzer) -> None:
             self.imports = []
             self.analyzer = analyzer
-            
+        
+        def recursive(func):
+            def wrapper(self,node):
+                func(self,node)
+                for child in ast.iter_child_nodes(node):
+                    self.visit(child)
+            return wrapper
+
 
         def visit_Import(self, node: ast.Import) -> None:
             
@@ -21,14 +29,17 @@ class PythonAnalyzer(BaseAnalyzer):
         def visit_ImportFrom(self, node: ast.ImportFrom) -> None:
             
             for alias in node.names:
+                
+                if alias.asname == None:
+                    alias.asname = alias.name
                 self.add_alias(alias, node.module)
         
+        @recursive        
         def visit_Call(self, node: ast.Call) -> None:
             
             name = self.get_function_name(node)
             if name == None:
                 return
-            
             resolved = self.resolve_function_name(name)
 
             if resolved in PythonAnalyzer.dangerous_functions:
@@ -111,7 +122,6 @@ class PythonAnalyzer(BaseAnalyzer):
                 return 
             absolutename = ((module) if module == "" else (module + ".")) + alias.name
             usedname = alias.asname if alias.asname != None else absolutename
-
 
             self.add_import(absolutename, usedname)
              
