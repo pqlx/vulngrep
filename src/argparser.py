@@ -7,7 +7,7 @@ def parse():
 
     options = {
         "mode": "directory",    
-        "project-directory": "./",
+        "path": "./",
         "recursive": True,
         "filename-pattern": ".+",
         "language-associations": json.load(openabs("../cfg/filetype_regex.json")),
@@ -24,18 +24,13 @@ def parse():
                         default="directory",
                         dest="mode")
 
-    parser.add_argument("--project-directory", "-d",
-                         help="Directory of the project",
-                         action="store",
-                         default="./",
-                         dest="project-directory")
     
     parser.add_argument("--no-recursive",
                         help="Don't traverse recursively",
                         action="store_false",
                         dest="recursive")
     
-    parser.add_argument("--filename-pattern", "-p",
+    parser.add_argument("--filename-pattern",
                         help="Only analyze files matching this regex. Defaults to .+",
                         action="store",
                         default=".+",
@@ -64,6 +59,12 @@ def parse():
                         type=lambda x: json.load(open(x)) if x != "" else {},
                         default="",
                         dest="dangerous-functions-2")
+     
+    parser.add_argument( help="Directory or file, depending on mode. defaults to \"./\"",
+                         action="store",
+                         default="./",
+                         dest="path",
+                         nargs='?')
 
     parsed = vars(parser.parse_args())
     def merge(x):

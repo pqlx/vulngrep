@@ -25,7 +25,9 @@ class PythonAnalyzer(BaseAnalyzer):
         def visit_Call(self, node: ast.Call) -> None:
 
             name = self.get_function_name(node)
-            
+            if name == None:
+                return
+
             if self.resolve_function_name(name) in PythonAnalyzer.dangerous_functions:
                 self.analyzer.found.append({
                     "name": name,
@@ -49,9 +51,12 @@ class PythonAnalyzer(BaseAnalyzer):
                 if isinstance(current_node, ast.Attribute):
                     name = "." + current_node.attr + name
     
-                if isinstance(current_node, ast.Name):
+                elif isinstance(current_node, ast.Name):
                     name = current_node.id + name
                     break
+                else:
+                    return None
+                    
                 current_node = current_node.value
             return name
 
@@ -106,8 +111,7 @@ class PythonAnalyzer(BaseAnalyzer):
             })
 
     def __init__(self, options, filename):
-        super().__init__(options)
-        self.filename = filename
+        super().__init__(options, filename)
         self.found = []
         
     def analyze_file(self, buffer: str):
@@ -118,11 +122,3 @@ class PythonAnalyzer(BaseAnalyzer):
 
         walker.visit(parsed)
 
-if __name__ == "__main__":
-
-    PythonAnalyzer.dangerous_functions = ["eval", "a.c.b"]
-
-    a = PythonAnalyzer({}, "kek.py")
-
-    a.analyze_file("from a import c as b; b.b()")
-    print(a.found)
