@@ -2,6 +2,7 @@ from analyzers.BaseAnalyzer import BaseAnalyzer
 import ast
 from typing import *
 import re
+import astunparse
 
 class PythonAnalyzer(BaseAnalyzer):
     
@@ -28,10 +29,13 @@ class PythonAnalyzer(BaseAnalyzer):
             if name == None:
                 return
             
+            resolved = self.resolve_function_name(name)
 
-            if self.resolve_function_name(name) in PythonAnalyzer.dangerous_functions:
+            if resolved in PythonAnalyzer.dangerous_functions:
                 self.analyzer.found.append({
                     "name": name,
+                    "from": resolved,
+                    "code": astunparse.unparse(node).strip(),
                     "lineno": node.lineno,
                     "col": node.col_offset
                 })
@@ -122,7 +126,7 @@ class PythonAnalyzer(BaseAnalyzer):
 
     def __init__(self, options, filename):
         super().__init__(options, filename)
-        self.found = []
+        self.language = "python"
         
     def analyze_file(self, buffer: str):
         

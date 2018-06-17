@@ -1,1 +1,5 @@
 git+https://github.com/viraptor/phply
+git+https://github.com/simonpercivall/astunparse
+colored
+Pygments
+ansiwrap
