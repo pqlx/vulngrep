@@ -22,8 +22,11 @@ def main():
         
         path = options["path"]
         dirname = os.path.dirname(path)
-        basename = os.path.basename(path)
+        if dirname == "":
+            dirname = "."
 
+        basename = os.path.basename(path)
+        
         analyzer = resolve_parser_from_filename(options["path"], options["language-associations"])
         
         if analyzer == None:
@@ -41,6 +44,7 @@ def main():
         
         print_founds(analyzer)
 
+
 def resolve_parser_from_filename(filename, language_assocs):
     
     for language, regex in language_assocs.items():
@@ -51,10 +55,12 @@ def resolve_parser_from_filename(filename, language_assocs):
     return None
             
 def print_founds(analyzer: BaseAnalyzer):
-
+     
     for found in analyzer.found:
         print(f"{analyzer.filename}:{found['lineno']}:{found['col']}: {found['name']}")    
     
+    if len(analyzer.found) == 0:
+        print(f"{analyzer.filename}: No potentially dangerous functions found")
 
 if __name__ == "__main__":
     exit(main())
@@ -63,4 +69,10 @@ if __name__ == "__main__":
 
 if 1 == 0:
     eval("a")
+    import os
     os.system('ls')
+
+    import os.system as b
+    from os import *
+    b("a")
+    system("ls")

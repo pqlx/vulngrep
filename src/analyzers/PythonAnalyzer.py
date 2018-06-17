@@ -23,10 +23,11 @@ class PythonAnalyzer(BaseAnalyzer):
                 self.add_alias(alias, node.module)
         
         def visit_Call(self, node: ast.Call) -> None:
-
+            
             name = self.get_function_name(node)
             if name == None:
                 return
+            
 
             if self.resolve_function_name(name) in PythonAnalyzer.dangerous_functions:
                 self.analyzer.found.append({
@@ -64,8 +65,16 @@ class PythonAnalyzer(BaseAnalyzer):
             """
             Resolve a function name to its absolute name
             """
-            _function_name = function_name
+            
+            def compare_call(perm, _import):
+                if perm == _import:
+                    return True
+                
+                return False
 
+            _imports = self.imports
+
+            _function_name = function_name
             while True:
                 attributes = _function_name.split('.')
                 
@@ -75,12 +84,13 @@ class PythonAnalyzer(BaseAnalyzer):
                     
                     current_permutation = '.'.join(attributes[:cutoff])
                     
-                    for _import in self.imports:
-                        if current_permutation == _import["usedname"]:
+                    for _import in _imports:
+                        if compare_call(current_permutation, _import["usedname"]):
                             found = True
-                            attributes[:cutoff] = _import["absolutename"]
+
+                            attributes[:cutoff] = [_import["absolutename"]]
                             _function_name = '.'.join(attributes)
-                            _function_name = re.sub("\.+", ".", _function_name) # HACK to fix duplicate .s
+                            _imports.remove(_import)
                             break
 
                     if found:
