@@ -1,9 +1,9 @@
-import BaseAnalyzer
+from analyzers.BaseAnalyzer import BaseAnalyzer
 import ast
 from typing import *
 import re
 
-class PythonAnalyzer(BaseAnalyzer.BaseAnalyzer):
+class PythonAnalyzer(BaseAnalyzer):
     
     class PythonWalker(ast.NodeVisitor):
         
@@ -28,14 +28,11 @@ class PythonAnalyzer(BaseAnalyzer.BaseAnalyzer):
             
             if self.resolve_function_name(name) in PythonAnalyzer.dangerous_functions:
                 self.analyzer.found.append({
-                    
                     "name": name,
                     "lineno": node.lineno,
                     "col": node.col_offset
-
                 })
-                
-        
+                        
         def get_function_name(self, call: ast.Call):
             """
             Extract function name from a Call object
@@ -121,13 +118,11 @@ class PythonAnalyzer(BaseAnalyzer.BaseAnalyzer):
 
         walker.visit(parsed)
 
-
-
 if __name__ == "__main__":
 
     PythonAnalyzer.dangerous_functions = ["eval", "a.c.b"]
 
     a = PythonAnalyzer({}, "kek.py")
 
-    a.analyze_file("import a.c as b; b.b()")
+    a.analyze_file("from a import c as b; b.b()")
     print(a.found)

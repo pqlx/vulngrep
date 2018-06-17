@@ -1,14 +1,14 @@
 def parse():
     import argparse
     import json
-    from os.path import abspath
+    import os.path
 
     options = {
         "mode": "directory",    
         "project-directory": "./",
         "recursive": True,
         "filename-matches": ".+",
-        "language-associations": json.load(open(abspath("../cfg/filetype_regex.json")))
+        "language-associations": json.load(open(os.path.join(os.path.dirname(__file__), "../cfg/filetype_regex.json")))
     }
     
 
@@ -39,7 +39,7 @@ def parse():
                         dest="filename-matches")
     
     parser.add_argument("--language-associations", "-a",
-                        help="A json dictionary in the form of {\"language:\": \"regex\", \"language2\": \"regex2\", ...} to associate arbitrary filenames with arbitrary languages if for example a non-standard extension is used",
+                        help="A JSON object in the form of {\"language:\": \"regex\", \"language2\": \"regex2\", ...} to associate arbitrary filenames with arbitrary languages if for example a non-standard extension is used",
                         type=json.loads,
                         default="{}",
                         dest="language-associations")
